@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EmberGrid - Data Center Operations & AI Assistant</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Phosphor Icons CDN -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css?v=6">
+  <!-- Three.js & Controls -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  
+  <script type="module" src="app.js?v=9"></script>
+</head>
+<body>
+  <script>
+    if (!localStorage.getItem('aura_auth')) {
+      window.location.href = 'login.html';
+    }
+  </script>
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-icon">
+          <i class="ph-duotone ph-cpu"></i>
+        </div>
+        <div>
+          <h1 class="brand-title">EmberGrid</h1>
+        </div>
+        <span class="brand-tag">Data Center Operations Copilot</span>
+      </div>
+
+      <div class="header-status-bar">
+        <div class="status-indicator-badge">
+          <span class="pulse-dot"></span>
+          <span>DC-WEST-01: ONLINE</span>
+        </div>
+        <div style="color:var(--text-muted); font-size:12px; font-family:var(--font-mono);" id="header-alert-count">
+          0 Alerts
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn" id="header-btn-cooling" title="Trigger Emergency Chiller Override">
+          <i class="ph-duotone ph-snowflake"></i> Emergency Cooling
+        </button>
+        <button class="btn btn-primary" id="header-btn-rebalance" title="Trigger VM Workload Rebalance">
+          <i class="ph-duotone ph-arrows-left-right"></i> Live Rebalance
+        </button>
+        <select id="lang-select-main" class="lang-select">
+          <option value="en">English (US)</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="zh">中文</option>
+          <option value="hi">हिन्दी</option>
+        </select>
+        <button class="btn btn-icon" id="toggle-theme-btn" title="Toggle Dark/Light Mode">
+          <i class="ph-duotone ph-moon"></i>
+        </button>
+        <button class="btn btn-icon" id="toggle-copilot-btn" title="Toggle Preeti AI Drawer">
+          <i class="ph-duotone ph-robot"></i>
+        </button>
+        <div class="user-dropdown-container">
+          <div class="user-profile-btn" style="display:flex; align-items:center; gap:8px; padding:6px 12px; background:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.6); border-radius:99px; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.8)'; this.style.transform='scale(1.02)';" onmouseout="this.style.background='rgba(255,255,255,0.4)'; this.style.transform='scale(1)';">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=0284c7&color=fff" alt="User" style="width:24px; height:24px; border-radius:50%;">
+            <span style="font-size:13px; font-weight:600; color:var(--text-main);">Admin</span>
+            <i class="ph-bold ph-caret-down" style="font-size:12px; color:var(--text-muted);"></i>
+          </div>
+          <div class="user-dropdown-menu">
+            <a href="#" class="user-dropdown-item"><i class="ph-duotone ph-gear"></i> Settings</a>
+            <a href="#" class="user-dropdown-item"><i class="ph-duotone ph-credit-card"></i> Billing</a>
+            <a href="#" class="user-dropdown-item"><i class="ph-duotone ph-users"></i> Manage Users</a>
+            <div class="user-dropdown-divider"></div>
+            <a href="login.html" class="user-dropdown-item" style="color:var(--status-critical);"><i class="ph-duotone ph-sign-out"></i> Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <div>
+        <div class="nav-group-label">Infrastructure View</div>
+        <ul class="nav-menu">
+          <li>
+            <a href="#" class="nav-item active" data-tab="floorplan">
+              <i class="ph-duotone ph-grid-four"></i> Floor Grid & Racks
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-tab="analytics">
+              <i class="ph-duotone ph-chart-line-up"></i> Telemetry & PUE
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-tab="incidents">
+              <i class="ph-duotone ph-warning-circle"></i> Incident & Alerts Log
+            </a>
+          </li>
+        </ul>
+
+        <div class="nav-group-label" style="margin-top:24px;">Energy & Heat Harvesting</div>
+        <ul class="nav-menu">
+          <li>
+            <a href="#" class="nav-item" data-tab="heat-recovery">
+              <i class="ph-duotone ph-lightning"></i> Heat-to-Electricity (ORC/TEG)
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-tab="sih-presentation">
+              <i class="ph-duotone ph-info"></i> About and Help Desk
+            </a>
+          </li>
+        </ul>
+
+        <div class="nav-group-label" style="margin-top:24px;">AI Automation</div>
+        <ul class="nav-menu">
+          <li>
+            <a href="#" class="nav-item" data-tab="automation">
+              <i class="ph-duotone ph-arrows-clockwise"></i> Failover Drills
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer-card">
+        <div class="sidebar-footer-title"><i class="ph-duotone ph-shield-check"></i> Tier 4 Facility Active</div>
+        <div class="sidebar-footer-desc">PUE Target: &lt; 1.25<br>SLA Uptime: 99.999%</div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Content -->
+    <main class="app-main">
+      
+      <!-- Real-time KPI Metric Strip -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>PUE Gauge</span>
+            <div class="kpi-icon"><i class="ph-duotone ph-gauge"></i></div>
+          </div>
+          <div class="kpi-value" id="kpi-pue-val">1.18</div>
+          <div class="kpi-subtext trend-up"><i class="ph-bold ph-caret-down"></i> -0.02 vs 24h avg (Optimal)</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Total Power Draw</span>
+            <div class="kpi-icon"><i class="ph-duotone ph-lightning"></i></div>
+          </div>
+          <div class="kpi-value" id="kpi-power-val">422 kW</div>
+          <div class="kpi-subtext"><i class="ph-bold ph-trend-up"></i> IT Load: 350 kW | Cooling: 72 kW</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Avg Floor Temp</span>
+            <div class="kpi-icon"><i class="ph-duotone ph-thermometer-simple"></i></div>
+          </div>
+          <div class="kpi-value" id="kpi-temp-val">23.5 °C</div>
+          <div class="kpi-subtext"><i class="ph-bold ph-check-circle"></i> ASHRAE Recommended Range</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Healthy Racks</span>
+            <div class="kpi-icon"><i class="ph-duotone ph-hard-drives"></i></div>
+          </div>
+          <div class="kpi-value" id="kpi-racks-val">30 / 32</div>
+          <div class="kpi-subtext" style="color:var(--status-warning);"><i class="ph-bold ph-warning"></i> 2 Racks Require Inspection</div>
+        </div>
+      </section>
+
+      <!-- TAB VIEW 1: Floor Plan Grid -->
+      <div class="tab-view" id="view-floorplan">
+        <!-- Control Toolbar -->
+        <div class="toolbar" style="margin-bottom:20px;">
+          <div class="toolbar-group">
+            <span style="font-size:12px; font-weight:600; color:var(--text-muted);">ZONE FILTER:</span>
+            <div class="filter-btn-group">
+              <button class="filter-btn zone-filter-btn active" data-zone="all">All Zones</button>
+              <button class="filter-btn zone-filter-btn" data-zone="zone-a">Zone A (AI Compute)</button>
+              <button class="filter-btn zone-filter-btn" data-zone="zone-b">Zone B (Database)</button>
+              <button class="filter-btn zone-filter-btn" data-zone="zone-c">Zone C (Storage)</button>
+            </div>
+          </div>
+
+          <div class="toolbar-group">
+            <button class="btn" id="toggle-heatmap-btn">
+              <i class="ph-duotone ph-thermometer-simple"></i> Toggle Heatmap Overlay
+            </button>
+          </div>
+        </div>
+
+        <!-- Data Center Interactive Floor Grid -->
+        <div id="datacenter-floor" class="datacenter-floor">
+          <!-- Dynamically populated by rackView.js -->
+        </div>
+      </div>
+
+      <!-- TAB VIEW 2: Telemetry Analytics -->
+      <div class="tab-view hidden" id="view-analytics">
+        <h2 style="font-size:18px; font-weight:600; margin-bottom:16px;">Real-Time Data Center Telemetry Analytics</h2>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:20px;">
+          <div class="zone-section">
+            <h3 style="font-size:14px; font-weight:600; margin-bottom:12px;">Power Usage Effectiveness (PUE) Trend</h3>
+            <div class="chart-container">
+              <canvas id="chart-pue"></canvas>
+            </div>
+          </div>
+
+          <div class="zone-section">
+            <h3 style="font-size:14px; font-weight:600; margin-bottom:12px;">Total Power Draw (kW)</h3>
+            <div class="chart-container">
+              <canvas id="chart-power"></canvas>
+            </div>
+          </div>
+
+          <div class="zone-section" style="grid-column: 1 / -1;">
+            <h3 style="font-size:14px; font-weight:600; margin-bottom:12px;">Ambient Thermal Profile (°C)</h3>
+            <div class="chart-container">
+              <canvas id="chart-temp"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB VIEW 3: Incident Log -->
+      <div class="tab-view hidden" id="view-incidents">
+        <h2 style="font-size:18px; font-weight:600; margin-bottom:16px;">Active Incidents & Thermal Alerts</h2>
+        <div id="incidents-list-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- TAB VIEW 4: Heat-to-Electricity Simulator -->
+      <div class="tab-view hidden" id="view-heat-recovery">
+        <!-- Rendered by heatRecoveryView.js -->
+      </div>
+
+      <!-- TAB VIEW 5: SIH Presentation & Feasibility Deck -->
+      <div class="tab-view hidden" id="view-sih-presentation">
+        <!-- Rendered by sihPresentationView.js -->
+      </div>
+
+      <!-- TAB VIEW 5: Failover Automation -->
+      <div class="tab-view hidden" id="view-automation">
+        <h2 style="font-size:18px; font-weight:600; margin-bottom:16px;">AI Disaster Recovery & Failover Simulation</h2>
+        <div class="zone-section">
+          <p style="color:var(--text-muted); margin-bottom:16px;">Simulate facility emergency scenarios to evaluate AI Copilot auto-remediation and workload migrations.</p>
+          <div style="display:flex; gap:12px;">
+            <button class="btn btn-primary" onclick="window.auraApp.telemetry.triggerEmergencyCooling()">
+              <i class="ph-duotone ph-snowflake"></i> Test Zone Chiller Override
+            </button>
+            <button class="btn" onclick="window.auraApp.copilot.handleUserSubmit('Simulate VM live migration')">
+              <i class="ph-duotone ph-arrows-left-right"></i> Run Live Migration Drill
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Right Docked AI Operations Copilot Panel -->
+    <aside class="copilot-panel">
+      <div class="copilot-header">
+        <div class="copilot-title">
+          <div class="copilot-avatar">
+            <i class="ph-duotone ph-sparkle"></i>
+          </div>
+          <div>
+            <div>Preeti</div>
+            <div style="font-size:10px; color:var(--status-healthy); font-weight:500;">Active Context Monitor</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Container -->
+      <div class="copilot-chat-container" id="copilot-chat-container">
+        <!-- Messages added dynamically -->
+      </div>
+
+      <!-- Quick Prompt Suggestions -->
+      <div class="copilot-suggestions" id="copilot-suggestions">
+        <!-- Chips added dynamically -->
+      </div>
+
+      <!-- User Input Box -->
+      <div class="copilot-input-area">
+        <input type="text" class="copilot-input" id="copilot-input-field" placeholder="Ask Preeti to save CO2 and Electricity...">
+        <button class="btn btn-primary" id="copilot-send-btn" style="padding:10px 14px;">
+          <i class="ph-bold ph-paper-plane-right"></i>
+        </button>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Rack Inspection Modal -->
+  <div class="modal-backdrop" id="rack-modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-rack-id" style="font-size:18px; font-weight:700;">42U Rack Inspection</h3>
+          <div id="modal-rack-zone" style="font-size:12px; color:var(--text-muted);">Zone Location</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div id="modal-status-pill" class="status-indicator-badge">Status</div>
+          <button class="btn btn-icon" id="modal-close-btn"><i class="ph-bold ph-x"></i></button>
+        </div>
+      </div>
+      <div class="modal-body" id="modal-body-content">
+        <!-- Populated dynamically by rackView.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Hardware Edit Modal -->
+  <div class="modal-backdrop" id="hardware-modal-backdrop">
+    <div class="modal-card" style="width: 400px; max-width: 95%;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size:18px; font-weight:700;">Add Hardware</h3>
+          <div id="hardware-modal-zone-name" style="font-size:12px; color:var(--text-muted);">Zone Location</div>
+        </div>
+        <button class="btn btn-icon" id="hardware-modal-close-btn"><i class="ph-bold ph-x"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 24px; text-align: left;">
+        <label style="display:block; font-size:13px; font-weight:600; color:var(--text-main); margin-bottom:8px;">Number of 42U Racks to Deploy:</label>
+        <input type="number" id="hardware-rack-count" min="1" max="50" value="1" style="width:100%; padding:12px; border:1px solid rgba(0,0,0,0.1); border-radius:8px; margin-bottom:20px; font-size:16px; outline:none;">
+        
+        <div style="display:flex; gap:12px; justify-content:flex-end;">
+          <button class="btn" id="hardware-modal-cancel-btn">Cancel</button>
+          <button class="btn btn-primary" id="hardware-modal-deploy-btn"><i class="ph-duotone ph-rocket"></i> Deploy Racks</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Zone Modal -->
+  <div class="modal-backdrop" id="edit-zone-modal-backdrop">
+    <div class="modal-card" style="width: 400px; max-width: 95%;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size:18px; font-weight:700;">Edit Zone Settings</h3>
+          <div id="edit-zone-modal-zone-name" style="font-size:12px; color:var(--text-muted);">Zone Location</div>
+        </div>
+        <button class="btn btn-icon" id="edit-zone-modal-close-btn"><i class="ph-bold ph-x"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 24px; text-align: left;">
+        <label style="display:block; font-size:13px; font-weight:600; color:var(--text-main); margin-bottom:8px;">Target Temperature (°C):</label>
+        <input type="number" id="edit-zone-temp" min="15" max="35" value="22" style="width:100%; padding:12px; border:1px solid rgba(0,0,0,0.1); border-radius:8px; margin-bottom:16px; font-size:16px; outline:none; background:var(--bg-card); color:var(--text-main);">
+        
+        <label style="display:block; font-size:13px; font-weight:600; color:var(--text-main); margin-bottom:8px;">Power Allocation (kW):</label>
+        <input type="number" id="edit-zone-power" min="50" max="1000" value="250" style="width:100%; padding:12px; border:1px solid rgba(0,0,0,0.1); border-radius:8px; margin-bottom:24px; font-size:16px; outline:none; background:var(--bg-card); color:var(--text-main);">
+        
+        <div style="display:flex; gap:12px; justify-content:flex-end;">
+          <button class="btn" id="edit-zone-modal-cancel-btn">Cancel</button>
+          <button class="btn btn-primary" id="edit-zone-modal-save-btn"><i class="ph-duotone ph-floppy-disk"></i> Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js?v=9"></script>
+</body>
+</html>
